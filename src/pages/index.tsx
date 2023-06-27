@@ -1,9 +1,11 @@
 import Head from "next/head";
-import { SignIn, SignOutButton, useUser } from "@clerk/nextjs";
-import { SignInButton } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
+import { api } from "~/utils/api";
 
 export default function Home() {
   const user = useUser();
+
+  const { data } = api.expenses.getAll.useQuery();
 
   return (
     <>
@@ -13,17 +15,21 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        {!user.isSignedIn && (
-          <SignInButton mode="modal">
-            <button className="btn">Sign in</button>
-          </SignInButton>
-        )}
-
-        {!!user.isSignedIn && <SignOutButton />}
-
-        <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
-      </main>
+      {!!user.isSignedIn && (
+        <main>
+          <SignOutButton />
+          <h2>My Expenses</h2>
+          <div>
+            {data?.map((expense) => (
+              <div key={expense.id}>
+                {expense.amount}
+                <br />
+                {expense.purpose}
+              </div>
+            ))}
+          </div>
+        </main>
+      )}
     </>
   );
 }
